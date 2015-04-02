@@ -1,3 +1,7 @@
+# This code is licensed under GPLv2 FSF Licence
+# Please read the accompanied LICENSE file for more information
+# Contact: mr.vaibhavjain at gmail.com 
+
 __module_name__ = "autoaway" 
 __module_version__ = "1.0" 
 __module_description__ = "Python module for xchat that autometically marks your nick as 'nick_away' when you lock your desktop" 
@@ -14,7 +18,7 @@ timer_hook = None
 bus = dbus.SessionBus()
 screensaver = bus.get_object('org.gnome.ScreenSaver', '/org/gnome/ScreenSaver')
 proxy = dbus.Interface(screensaver, 'org.gnome.ScreenSaver')
-isactive = proxy.GetActive()
+isactive = 0
 re_away = re.compile(r"(.*)_away")
 
 # Called when the module is aboute to be unloaded
@@ -58,6 +62,9 @@ def update_away_nick():
                 newnick = nick + "_away"
                 print "[autoaway] Updating nick on server %s to %s" % (chnl.context.get_info('server'), newnick)
                 chnl.context.command("NICK "+newnick)
+            #update the away status
+            nick = chnl.context.get_info('away');
+            if nick is None:
                 chnl.context.command("AWAY Not Available")
 
 #sets the nick_away as nick
@@ -74,9 +81,18 @@ def update_backfromaway_nick():
                 nick = match.group(1)
                 print "[autoaway] Updating nick on server %s to %s" % (chnl.context.get_info('server'), nick)
                 chnl.context.command("NICK "+nick)
+            #reset the away status if needed
+            nick = chnl.context.get_info('away');
+            if nick is not None:
                 chnl.context.command("AWAY")
 
+#reset the the away status 
+update_backfromaway_nick()
+
+# hook into module unload 
 xchat.hook_unload(unload_cb)
+
+#poll timer to lookout for screen saver
 timer_hook = xchat.hook_timer(1000, timeout_cb)
 
 print "[autoaway] Module Loaded"
