@@ -88,8 +88,9 @@ def update_backfromaway_nick():
                 chnl.context.command("BACK")
     return 0
 
+
 #reset the the away status 
-xchat.hook_timer(10000, update_backfromaway_nick)
+xchat.hook_timer(10000, lambda userdata: update_backfromaway_nick())
 
 # hook into module unload 
 xchat.hook_unload(unload_cb)
