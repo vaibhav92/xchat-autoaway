@@ -28,7 +28,7 @@ def unload_cb(userdata):
         xchat.unhook(timer_hook) 
         timer_hook = None
         #force the nick as away
-        update_away_nick();
+        update_away_nick()
         print "[autoaway] Module Unloads!"
 
 # Called every few seconds to see if any dbus events are pending
@@ -56,16 +56,17 @@ def update_away_nick():
     #iterate over connected servers and update the nick
     for chnl in lst:
         if chnl.type == 1:
-            nick = chnl.context.get_info('nick');
+            nick = chnl.context.get_info('nick')
             match = re_away.match(nick)
             if match is None:
                 newnick = nick + "_away"
                 print "[autoaway] Updating nick on server %s to %s" % (chnl.context.get_info('server'), newnick)
                 chnl.context.command("NICK "+newnick)
             #update the away status
-            nick = chnl.context.get_info('away');
+            nick = chnl.context.get_info('away')
             if nick is None:
                 chnl.context.command("AWAY Not Available")
+    return 0
 
 #sets the nick_away as nick
 def update_backfromaway_nick():
@@ -75,19 +76,20 @@ def update_backfromaway_nick():
     #iterate over connected servers and update the nick
     for chnl in lst:
         if chnl.type == 1:
-            nick = chnl.context.get_info('nick');
+            nick = chnl.context.get_info('nick')
             match = re_away.match(nick)
             if not (match is None):
                 nick = match.group(1)
                 print "[autoaway] Updating nick on server %s to %s" % (chnl.context.get_info('server'), nick)
                 chnl.context.command("NICK "+nick)
             #reset the away status if needed
-            nick = chnl.context.get_info('away');
+            nick = chnl.context.get_info('away')
             if nick is not None:
-                chnl.context.command("AWAY")
+                chnl.context.command("BACK")
+    return 0
 
 #reset the the away status 
-update_backfromaway_nick()
+xchat.hook_timer(10000, update_backfromaway_nick)
 
 # hook into module unload 
 xchat.hook_unload(unload_cb)
